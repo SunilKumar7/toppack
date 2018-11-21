@@ -1,0 +1,15 @@
+{
+	"name": "Toppack",
+	"description": "php practice..",
+	"type": "project",
+	"version": "1.0.0",
+	"require": {
+		"slim/slim": "^3.0",
+		"monolog/monolog": "^1.2",
+		"curl/curl": "^2.1"
+	},
+	"authors": [{
+		"name": "Sunil",
+		"email": "sunil.k@reportgarden.com"
+	}]
+}
