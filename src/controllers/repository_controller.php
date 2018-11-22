@@ -30,7 +30,7 @@ class RepositoryController extends BaseController {
 	 * @param array $args
 	 * @return Response
 	 */
-	public function search(Request $request, Response $response, array $args) {
+	public function search(Request $request, Response $response, array $args): Response {
 		$query = $request->getQueryParam('q');
 		$page = $request->getQueryParam('page') || 1;
 		$this->logger->debug("Query - {$query} || Page - {$page}");
@@ -42,6 +42,27 @@ class RepositoryController extends BaseController {
 			// store data in db and return that processed data..
 			$processedResult = GithubTransformer::transform($apiResponse['data']);
 			$response->getBody()->write(json_encode($processedResult));
+		}
+		return $response;
+	}
+
+	/**
+	 * @param Request $request
+	 * @param Response $response
+	 * @param array $args
+	 * @return Response
+	 */
+	public function import(Request $request, Response $response, array $args): Response {
+		$ownerName = $request->getQueryParam('ownerName') || "";
+		$repoName = $request->getQueryParam('repositoryName') || "";
+		$this->logger->debug("Owner - {$ownerName} || Repo- {$repoName}");
+		$apiResponse = GithubService::importPackages($ownerName, $repoName);
+		if (!!$apiResponse['errors']) {
+			$response->getBody()->write($apiResponse['errors']);
+		} else {
+			// Add transformation logic here.
+			// store data in db and return that processed data..
+			$response->getBody()->write($apiResponse['data']);
 		}
 		return $response;
 	}
