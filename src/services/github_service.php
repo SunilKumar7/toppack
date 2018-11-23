@@ -4,6 +4,7 @@ require __DIR__ . '/client_service.php';
 
 define('BASE_URL', 'https://api.github.com');
 define('SEARCH_URL', BASE_URL . '/search/repositories');
+define('PACKAGE_NOT_PRESENT', 'This project does not contain a package.json file');
 define('PAGE_LIMIT', 100);
 
 class GithubService {
@@ -29,22 +30,30 @@ class GithubService {
 	 * @param string $repo
 	 * @return array
 	 */
-	public static function importPackages(string $owner, string $repo): array {
+	public static function importPackages(string $owner, string $repo, $logger): array {
 		// Hard-coding for now.
 		$owner = "chvin";
 		$repo = "react-tetris";
-		$contentsUrl = BASE_URL . "/repos/{$owner}/{$repo}/contents/package.json";
+		$searchParams = [
+			"user"	=> $owner,
+			"repo" 	=> $repo
+		];
+		// Fetch the repository.
 		$client = new ClientService();
+		$repository = $client->executeGET(SEARCH_URL, $searchParams);
+		$logger->info($repository);
+		$contentsUrl = BASE_URL . "/repos/{$owner}/{$repo}/contents/package.json";
 		$response = $client->executeGET($contentsUrl);
 		if (!!$response['errors']) {
 			$errorMessage = json_decode($response['errors']);
 			if (strpos($errorMessage->{'message'}, "Not Found") === false) {
-				$response['errors'] = "This project does not contain a package.json file";
+				$response['errors'] = PACKAGE_NOT_PRESENT;
 			}
-			return $response;
 		} else {
 			$contents = json_decode($response['data']);
-			return $client->executeGET($contents->{'download_url'});
+			$logger->info(base64_decode($contents->{'content'}));
+			$response['data'] = base64_decode($contents->{'content'});
 		}
+		return $response;
 	}
 }

@@ -7,6 +7,8 @@ use Psr\Container\ContainerInterface;
 require 'base_controller.php';
 require __DIR__ . '/../services/github_service.php';
 require __DIR__ . '/../transformers/github_transformer.php';
+require __DIR__ . '/../models/repository.php';
+
 
 class RepositoryController extends BaseController {
 
@@ -40,7 +42,8 @@ class RepositoryController extends BaseController {
 		} else {
 			// Add transformation logic here.
 			// store data in db and return that processed data..
-			$processedResult = GithubTransformer::transform($apiResponse['data']);
+			$processedResult = GithubTransformer::transformRepositories($apiResponse['data']);
+			$this->logger->debug($processedResult);
 			$response->getBody()->write(json_encode($processedResult));
 		}
 		return $response;
@@ -56,13 +59,13 @@ class RepositoryController extends BaseController {
 		$ownerName = $request->getQueryParam('ownerName') || "";
 		$repoName = $request->getQueryParam('repositoryName') || "";
 		$this->logger->debug("Owner - {$ownerName} || Repo- {$repoName}");
-		$apiResponse = GithubService::importPackages($ownerName, $repoName);
+		$apiResponse = GithubService::importPackages($ownerName, $repoName, $this->logger);
 		if (!!$apiResponse['errors']) {
 			$response->getBody()->write($apiResponse['errors']);
 		} else {
-			// Add transformation logic here.
-			// store data in db and return that processed data..
-			$response->getBody()->write($apiResponse['data']);
+			$processedPackages = GithubTransformer::transformPackages($apiResponse['data']);
+			$response->getBody()->write(json_encode($processedPackages));
+			// TODO: Save to DB here.
 		}
 		return $response;
 	}
