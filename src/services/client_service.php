@@ -35,7 +35,7 @@ class ClientService {
 			$apiResponse["errors"] = ["Something horrible happened"];
 			return $apiResponse;
 		} else {
-			$apiResponse["data"] = $result->getBody();
+			$apiResponse["data"] = $result->getBody()->getContents();
 		}
 		return $apiResponse;
 	}

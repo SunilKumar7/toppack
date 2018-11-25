@@ -24,24 +24,23 @@ class GithubService {
 		return $client->executeGET(SEARCH_URL, $params);
 	}
 
+	public static function searchRepository(string $ownerName, string $repoName): array {
+		$params = [
+			"q" => "{$repoName}+user:{$ownerName}"
+		];
+		$client = new ClientService();
+		$response = $client->executeGET(SEARCH_URL, $params);
+		return $response;
+	}
+
 	/**
 	 * Fetches package.json information and fetches the raw data of package.json if exists.
 	 * @param string $owner
 	 * @param string $repo
 	 * @return array
 	 */
-	public static function importPackages(string $owner, string $repo, $logger): array {
-		// Hard-coding for now.
-		$owner = "chvin";
-		$repo = "react-tetris";
-		$searchParams = [
-			"user"	=> $owner,
-			"repo" 	=> $repo
-		];
-		// Fetch the repository.
+	public static function searchPackages(string $owner, string $repo): array {
 		$client = new ClientService();
-		$repository = $client->executeGET(SEARCH_URL, $searchParams);
-		$logger->info($repository);
 		$contentsUrl = BASE_URL . "/repos/{$owner}/{$repo}/contents/package.json";
 		$response = $client->executeGET($contentsUrl);
 		if (!!$response['errors']) {
@@ -51,7 +50,6 @@ class GithubService {
 			}
 		} else {
 			$contents = json_decode($response['data']);
-			$logger->info(base64_decode($contents->{'content'}));
 			$response['data'] = base64_decode($contents->{'content'});
 		}
 		return $response;
