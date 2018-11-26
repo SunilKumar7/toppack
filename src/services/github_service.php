@@ -15,7 +15,7 @@ class GithubService {
 	 * @return array
 	 */
 	public static function searchRepositories(string $page, string $query): array {
-		$url = SEARCH_URL . "?q={$query}&page={$page}&per_page=" . PAGE_LIMIT;
+		$url = SEARCH_URL . "?q={$query}+language:javascript&page={$page}&per_page=" . PAGE_LIMIT;
 		$client = new ClientService();
 		return $client->executeGET($url);
 	}
