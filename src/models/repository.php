@@ -7,8 +7,19 @@ class Repository extends Model {
 	 * @var string
 	 */
 	protected $table = 'repositories';
+
 	/**
-	 * @var array
+	 * @var string - Primary key
+	 */
+	protected $primaryKey = "repository_id";
+
+	/**
+	 * @var bool
+	 */
+	public $incrementing = false;
+
+	/**
+	 * @var array - mass insert.
 	 */
 	protected $fillable = [
 		"repository_id",

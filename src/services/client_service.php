@@ -21,12 +21,10 @@ class ClientService {
 	 * @param array $params - query params.
 	 * @return array - follows pattern of [errors=> "", data=> ""]
 	 */
-	public function executeGET(string $url, array $params=[]): array {
+	public function executeGET(string $url): array {
 		$apiResponse = ["errors"=> "", "data"=> ""];
 		try {
-			$result = $this->client->request('GET', $url, [
-				"query"=> $params
-			]);
+			$result = $this->client->request('GET', $url);
 		} catch (GuzzleException $err) {
 			$apiResponse["errors"] = [$err->getMessage()];
 			return $apiResponse;

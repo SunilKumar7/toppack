@@ -38,9 +38,9 @@ class RepositoryController extends BaseController {
 	 * @param array $args
 	 * @return Response
 	 */
-	public function search(Request $request, Response $response, array $args): Response {
+	public function search(Request $request, Response $response): Response {
 		$query = $request->getQueryParam('q');
-		$page = $request->getQueryParam('page') || 1;
+		$page = $request->getQueryParam('page') ?? "1";
 		$this->logger->debug("Query - {$query} || Page - {$page}");
 		$apiResponse = GithubService::searchRepositories($page, $query);
 		if (!!$apiResponse['errors']) {
@@ -60,8 +60,8 @@ class RepositoryController extends BaseController {
 	 * @return Response
 	 */
 	public function import(Request $request, Response $response, array $args): Response {
-		$ownerName = "facebook";
-		$repoName = "react";
+		$ownerName = $request->getQueryParam('owner');
+		$repoName = $request->getQueryParam('repo');
 		$this->logger->debug("Owner - {$ownerName} || Repo- {$repoName}");
 		$fullName = "$ownerName/$repoName";
 		if (Repository::where("full_name", $fullName)->exists()) {
