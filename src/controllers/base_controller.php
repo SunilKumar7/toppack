@@ -3,6 +3,9 @@
 use \Psr\Container\ContainerInterface;
 
 class BaseController {
+	/**
+		* @var \Psr\Container\ContainerInterface
+	 */
 	protected $container;
 
 	/**
