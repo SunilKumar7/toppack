@@ -38,7 +38,7 @@ class GithubService {
 		$contentsUrl = BASE_URL . "/repos/{$owner}/{$repo}/contents/package.json";
 		$response = $client->executeGET($contentsUrl);
 		if (!!$response['errors']) {
-			$errorMessage = json_decode($response['errors']);
+			$errorMessage = json_encode($response['errors']);
 			if (strpos($errorMessage->{'message'}, "Not Found") === false) {
 				$response['errors'] = PACKAGE_NOT_PRESENT;
 			}

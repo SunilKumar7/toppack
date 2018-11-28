@@ -3,7 +3,12 @@
 use \Illuminate\Support\Carbon;
 
 class GithubTransformer {
-	public static function transformRepositories(string $items): array {
+	/**
+	 * @param string $items
+	 * @param bool $isImported
+	 * @return array
+	 */
+	public static function transformRepositories(string $items, bool $isImported): array {
 		$transformedItems = [];
 		$itemsJson = json_decode($items, true)['items'];
 		foreach ($itemsJson as $repo) {
@@ -16,12 +21,16 @@ class GithubTransformer {
 				"star_count" 				=> $repo["stargazers_count"],
 				"fork_count" 				=> $repo["forks_count"],
 				"repo_url" 					=> $repo["html_url"],
-				"imported" 					=> false,
+				"imported"					=> $isImported
 			]);
 		}
 		return $transformedItems;
 	}
 
+	/**
+	 * @param string $packages
+	 * @return array
+	 */
 	public static function transformPackages(string $packages): array {
 		$packagesJson = json_decode($packages, true);
 		$devDependencies = array_keys($packagesJson['devDependencies'] ?? []);

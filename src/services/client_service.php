@@ -26,11 +26,11 @@ class ClientService {
 		try {
 			$result = $this->client->request('GET', $url);
 		} catch (GuzzleException $err) {
-			$apiResponse["errors"] = [$err->getMessage()];
+			$apiResponse["errors"] = "Server Error, Please try again.";
 			return $apiResponse;
 		}
 		if ($result->getStatusCode() != 200) {
-			$apiResponse["errors"] = ["Something horrible happened"];
+			$apiResponse["errors"] = "Something went wrong, Please try again.";
 			return $apiResponse;
 		} else {
 			$apiResponse["data"] = $result->getBody()->getContents();

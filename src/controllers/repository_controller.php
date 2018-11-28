@@ -44,13 +44,13 @@ class RepositoryController extends BaseController {
 		$this->logger->debug("Query - {$query} || Page - {$page}");
 		$apiResponse = GithubService::searchRepositories($page, $query);
 		if (!!$apiResponse['errors']) {
-			$response->getBody()->write($apiResponse['errors'][0]);
+			$response->getBody()->write($apiResponse['errors']);
 		} else {
-			$processedResult = GithubTransformer::transformRepositories($apiResponse['data']);
+			$processedResult = GithubTransformer::transformRepositories($apiResponse['data'], false);
 			$this->logger->debug(json_encode($processedResult));
 			$response->getBody()->write(json_encode($processedResult));
 		}
-		return $response;
+		return $response->withHeader('Access-Control-Allow-Origin', '*');
 	}
 
 	/**
@@ -60,8 +60,8 @@ class RepositoryController extends BaseController {
 	 * @return Response
 	 */
 	public function import(Request $request, Response $response, array $args): Response {
-		$ownerName = $request->getQueryParam('owner');
-		$repoName = $request->getQueryParam('repo');
+		$ownerName = $request->getParsedBodyParam('ownerName');
+		$repoName = $request->getParsedBodyParam('repoName');
 		$this->logger->debug("Owner - {$ownerName} || Repo- {$repoName}");
 		$fullName = "$ownerName/$repoName";
 		if (Repository::where("full_name", $fullName)->exists()) {
@@ -69,21 +69,31 @@ class RepositoryController extends BaseController {
 			$this->logger->error("Repository already exists");
 		}
 		$repositoryResponse = GithubService::searchRepository($ownerName, $repoName);
-		$repo = GithubTransformer::transformRepositories($repositoryResponse['data']);
+		$repo = GithubTransformer::transformRepositories($repositoryResponse['data'], true);
 		$repository = new Repository($repo[0]);
 		$packagesResponse = GithubService::searchPackages($ownerName, $repoName);
+		if (!!$packagesResponse['errors']) {
+			$response->getBody()->write($packagesResponse['errors']);
+			return $response->withHeader('Access-Control-Allow-Origin', '*')->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+		}
 		$packages = GithubTransformer::transformPackages($packagesResponse['data']);
-		$this->db->getConnection()->transaction(function () use ($repository, $packages) {
-			if (!$repository->save()) {
-				$this->logger->error("Unable to save the repository");
-			} else {
-				// TODO: Handle errors here.
-				$importedPackages = Package::importPackages($packages);
-				$this->logger->info($importedPackages);
-				$repository->packages()->attach($importedPackages);
-			}
-		});
-		$response->getBody()->write(json_encode("Successfully imported"));
-		return $response;
+		try {
+			$this->db->getConnection()->transaction(function () use ($repository, $packages) {
+				$this->logger->debug("Repository :: {$repository}");
+				$this->logger->debug("Packages :: {$packages}");
+				if (!$repository->save()) {
+					$this->logger->error("Unable to save the repository");
+				} else {
+					// TODO: Handle errors here.
+					$importedPackages = Package::importPackages($packages);
+					$this->logger->info($importedPackages);
+					$repository->packages()->attach($importedPackages);
+				}
+			});
+		} catch (Throwable $e) {
+			$this->logger->error("Something went wrong");
+		}
+		$response->getBody()->write("Successfully imported");
+		return $response->withHeader('Access-Control-Allow-Origin', '*')->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
 	}
 }
