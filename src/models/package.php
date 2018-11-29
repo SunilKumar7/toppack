@@ -10,6 +10,9 @@ class Package extends Model {
 	 */
 	protected $table = 'packages';
 
+	/**
+	 * @var string - Primary key.
+	 */
 	protected $primaryKey = "package_id";
 
 	/**
@@ -21,7 +24,14 @@ class Package extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
 	 */
 	public function repositories() {
-		return $this->belongsToMany(Package::class, "repository_packages", "package_id", "repository_id");
+		return $this->belongsToMany(Repository::class, "repository_packages", "package_id", "repository_id");
+	}
+
+	/**
+	 * @return \Illuminate\Support\Collection
+	 */
+	public static function getTopPackages(): \Illuminate\Support\Collection {
+		return DB::table((new static)->getTable());
 	}
 
 	/**
@@ -30,7 +40,7 @@ class Package extends Model {
 	 *
 	 * @throws \Exception
 	 */
-	public static function importPackages(array $packageNames) {
+	public static function importPackages(array $packageNames): \Illuminate\Database\Eloquent\Collection {
 		$packageValues = "";
 		foreach ($packageNames as $package) {
 			$packageValues .= "(?, 1),";

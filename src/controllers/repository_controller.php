@@ -4,11 +4,11 @@ use \Slim\Http\Request;
 use \Slim\Http\Response;
 use Psr\Container\ContainerInterface;
 
-require 'base_controller.php';
-require __DIR__ . '/../services/github_service.php';
-require __DIR__ . '/../transformers/github_transformer.php';
-require __DIR__ . '/../models/repository.php';
-require __DIR__ . '/../models/package.php';
+require_once 'base_controller.php';
+require_once __DIR__ . '/../services/github_service.php';
+require_once __DIR__ . '/../transformers/github_transformer.php';
+require_once __DIR__ . '/../models/repository.php';
+require_once __DIR__ . '/../models/package.php';
 
 class RepositoryController extends BaseController {
 
@@ -59,7 +59,7 @@ class RepositoryController extends BaseController {
 	 * @param array $args
 	 * @return Response
 	 */
-	public function import(Request $request, Response $response, array $args): Response {
+	public function import(Request $request, Response $response): Response {
 		$ownerName = $request->getParsedBodyParam('ownerName');
 		$repoName = $request->getParsedBodyParam('repoName');
 		$this->logger->debug("Owner - {$ownerName} || Repo- {$repoName}");
