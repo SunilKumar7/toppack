@@ -1,0 +1,22 @@
+version: '3'
+services:
+  web:
+    image: "test-docker"
+    command: "php -S 0.0.0.0:8080 -t /app/src"
+    ports:
+    - "8080:8080"
+    volumes:
+    - ./:/app
+    tty: true
+    links:
+    - db
+  db:
+    image: "mysql/mysql-server"
+    environment:
+        - MYSQL_DATABASES=toppack
+        - MYSQL_ROOT_PASSWORD=root
+        - MYSQL_HOST=localhost
+        - MYSQL_USER=debian-sys-maint
+        - MYSQL_PASSWORD=wLGDX8sdWxBVONDt
+    ports:
+    - "3306:3306"

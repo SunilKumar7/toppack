@@ -29,15 +29,11 @@ RUN mkdir /app
 # COPY files to the container.
 ADD . /app
 
-
 # Run composer install to install php dependencies.
-RUN cd /app && rm composer.lock && composer install
+RUN cd /app && rm -rf composer.lock && composer install
 
-# Not sure Why exposing a port is needed?
-EXPOSE 8080
-
-# Not sure what this is..
-CMD ["/usr/bin/php"]
+# To Run php as starting command. Put php server start command here.
+CMD = ["php", "-S", "0.0.0.0:8080", "-t", "src"]
 
 
 
